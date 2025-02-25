@@ -1,8 +1,17 @@
-FROM python:3.9-slim
-WORKDIR /app
+# اختيار صورة PHP
+FROM php:8.0-cli
 
-COPY . /app
+# نسخ ملفات المشروع
+COPY . /var/www/html/
 
-RUN pip install --no-cache-dir -r requirements.txt
+# تحديد مجلد العمل
+WORKDIR /var/www/html/
 
-CMD ["python3", "run.py"]
+# تثبيت التبعيات اللازمة
+RUN apt-get update && apt-get install -y \
+    curl \
+    libcurl4-openssl-dev \
+    && docker-php-ext-install curl
+
+# تشغيل السكربت عند بدء الحاوية
+CMD ["php", "bot.php"]
