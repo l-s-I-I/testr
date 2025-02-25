@@ -1,6 +1,6 @@
 <?php
 // استرجاع التوكن من البيئة
-$TOKEN = getenv('BOT_TOKEN');
+$TOKEN = getenv('BOT_TOKEN');  // تأكد من أنك قمت بتعيين التوكن في البيئة
 $data = json_decode(file_get_contents('php://input'), true);  // قراءة التحديثات من Telegram
 
 // التحقق من وجود بيانات رسائل
@@ -31,11 +31,20 @@ if (isset($data['message'])) {
     }
 }
 
-// لتشغيل Webhook مع الرابط الخاص بك، تأكد من استخدام الرابط التالي
+// لتشغيل Webhook مع الرابط الخاص بك
 $webhook_url = "http://195.35.2.79:8000/api/v1/deploy?uuid=rs8okgo4sssskc40o0w8cosw&force=false";
 
-// إرسال طلب Webhook لتشغيله
-$response = file_get_contents($webhook_url);
+// استبدال "YOUR_API_KEY_HERE" بـ API Key الخاص بك
+$options = [
+    "http" => [
+        "header" => "Authorization: Bearer 1|8tlNz15FAmnBKabtNK7DmDiOzPcs6pXzmfyeLmZ7c97b5f54"  // استخدم الـ API Token الخاص بك هنا
+    ]
+];
+
+$context = stream_context_create($options);
+
+// إرسال طلب Webhook مع السياق المعدل
+$response = file_get_contents($webhook_url, false, $context);
 
 // طباعة رد الـ Webhook
 if ($response === FALSE) {
