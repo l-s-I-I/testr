@@ -1,46 +1,24 @@
 <?php
-// استرجاع التوكن من المتغير البيئي
-$TOKEN = getenv('BOT_TOKEN');
+// استرجاع التوكن من البيئة
+$TOKEN = getenv('BOT_TOKEN');  
+$data = json_decode(file_get_contents('php://input'), true);  // قراءة التحديثات من Telegram
 
-// إعداد متغير ss
-$ss = "❤️‍🔥";
+// تحقق من وجود رسالة في البيانات
+if (isset($data['message'])) {
+    $chat_id = $data['message']['chat']['id'];  // استرجاع معرف الدردشة
+    $message_id = $data['message']['message_id'];  // استرجاع معرف الرسالة
+    $message_text = $data['message']['text'];  // استرجاع نص الرسالة
 
-// URL للـ API الخاص بالبوت
-$api_url = "https://api.telegram.org/bot{$TOKEN}/";
+    // إذا كانت الرسالة تحتوي على النص "hello"
+    if (strpos($message_text, 'hello') !== false) {
+        // رسالة الترحيب مع إيموجي
+        $welcome_message = "Hi 👋";
 
-// دالة لتفاعل البوت مع الرسائل
-function react_to_message($chat_id, $message_id, $ss, $api_url) {
-    $url = $api_url . 'setMessageReaction';
-    $data = [
-        'chat_id' => $chat_id,
-        'message_id' => $message_id,
-        'reaction' => [['type' => 'emoji', 'emoji' => $ss]]
-    ];
-    $options = [
-        'http' => [
-            'header'  => "Content-type: application/json\r\n",
-            'method'  => 'POST',
-            'content' => json_encode($data)
-        ]
-    ];
-    $context = stream_context_create($options);
-    file_get_contents($url, false, $context);
-}
+        // إرسال رسالة عبر API Telegram
+        $url = "https://api.telegram.org/bot{$TOKEN}/sendMessage?chat_id={$chat_id}&text=" . urlencode($welcome_message);
 
-// دالة لمعالجة الرسائل
-function handle_message($message, $ss, $api_url) {
-    $text = $message['text'];
-    if (strpos($text, '.') !== false || strpos($text, '/') !== false) {
-        react_to_message($message['chat']['id'], $message['message_id'], $ss, $api_url);
+        // إرسال الطلب إلى API Telegram
+        file_get_contents($url);
     }
-}
-
-// الوصول إلى التحديثات الجديدة للبوت
-$update_url = $api_url . "getUpdates";
-$updates = json_decode(file_get_contents($update_url), true);
-
-// معالجة كل رسالة جديدة
-foreach ($updates['result'] as $update) {
-    handle_message($update['message'], $ss, $api_url);
 }
 ?>
